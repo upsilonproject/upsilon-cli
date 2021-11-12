@@ -12,3 +12,6 @@
 *.out
 
 /upsilon
+
+**/*.swp
+**/*.swo

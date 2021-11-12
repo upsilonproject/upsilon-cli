@@ -25,6 +25,7 @@ func init() {
 	cmds.NodeCmd.AddCommand(cmds.NodeListCmd)
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
+	rootCmd.AddCommand(cmds.CmdMsgTail)
 
 	rootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
 }
