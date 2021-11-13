@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )
 
 func Execute() {
@@ -13,5 +14,6 @@ func Execute() {
 }
 
 func main() {
+	amqp.ConnectionIdentifier = "upsilon-cli"
 	Execute()
 }

@@ -2,84 +2,27 @@ package cmds
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
-	amqp2 "github.com/streadway/amqp"
 	log "github.com/sirupsen/logrus"
-	"time"
+
+	//"google.golang.org/protobuf/proto"
+
+	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )
 
 func msgTail(cmd *cobra.Command, args []string) {
-	c, err := amqp.GetChannel("upsilon-cli")
+	c, err := amqp.GetChannel()
 
 	if err != nil {
-		log.Warnf("%v", err)
+		log.Warnf("Could not get chan: %s", err)
 		return
 	}
 
-	q, err := c.QueueDeclare(
-		"asdf",
-		false, // durable
-		false, // delete when unused
-		true, // exclusive
-		true, // nowait
-		nil, // args
-	)
+	amqp.Consume(c, "*", func(d amqp.Delivery) {
+		d.Message.Ack(true)
 
-	if err != nil {
-		log.Warnf("%v", err)
-		return
-	}
-
-	err = c.QueueBind(
-		q.Name, 
-		"*", // key
-		"ex_upsilon",
-		true, // nowait
-		nil, // args
-	)
-
-	if err != nil {
-		log.Warnf("%v", err)
-		return
-	}
-
-	var done chan error;
-
-		deliveries, err := c.Consume(
-			q.Name, // name
-			"tag",      // consumerTag,
-			false,      // noAck
-			false,      // exclusive
-			false,      // noLocal
-			false,      // noWait
-			nil,        // arguments
-		)
-
-		if err != nil {
-			log.Warnf("%v", err)
-			return
-		}
-
-		go consumeDeliveries(deliveries, done)	
-
-	for {
-		time.Sleep(10 * time.Second)
-	}
-}
-
-func consumeDeliveries(deliveries <-chan amqp2.Delivery, done chan error) {
-	log.Infof("consuming")
-
-	for d := range deliveries {
-		log.Infof(
-			"msg (%dB): %q",
-			len(d.Body),
-			d.Body,
-		)
-		d.Ack(false)
-	}
-	log.Printf("handle: deliveries channel closed")
-	done <- nil
+		log.Infof("Delivery %+v", string(d.Message.Body));
+		//len(d.Message.Body), string(d.Message.Body))
+	})
 }
 
 var CmdMsgTail = &cobra.Command{

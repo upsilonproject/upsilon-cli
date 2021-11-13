@@ -26,6 +26,7 @@ func init() {
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
 	rootCmd.AddCommand(cmds.CmdMsgTail)
+	rootCmd.AddCommand(cmds.CmdPing)
 
 	rootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
 }
