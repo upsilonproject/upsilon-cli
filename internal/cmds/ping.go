@@ -9,16 +9,9 @@ import (
 )
 
 func runPing(cmd *cobra.Command, args []string) {
-	c, err := amqp.GetChannel()
-
-	if err != nil {
-		log.Warnf("Could not get chan: %s", err)
-		return
-	}
-
 	req := pb.PingRequest{}
 
-	go amqp.Consume(c, "PingResponse", func(d amqp.Delivery) {
+	go amqp.Consume("PingResponse", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
 		res := pb.PingResponse{}
@@ -28,11 +21,10 @@ func runPing(cmd *cobra.Command, args []string) {
 		log.Infof("Ping reply: %+v", res.Hostname)
 	});
 
-	log.Infof("consuming")
-	
+	// The AMQP Server seems to need a moment to create the consumer.
 	time.Sleep(time.Second * 1)
 
-	amqp.PublishPb(c, req)
+	amqp.PublishPb(&req)
 
 	time.Sleep(time.Second * 120)
 }

@@ -10,14 +10,7 @@ import (
 )
 
 func msgTail(cmd *cobra.Command, args []string) {
-	c, err := amqp.GetChannel()
-
-	if err != nil {
-		log.Warnf("Could not get chan: %s", err)
-		return
-	}
-
-	amqp.Consume(c, "*", func(d amqp.Delivery) {
+	amqp.Consume("*", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
 		log.Infof("Delivery %+v", string(d.Message.Body));

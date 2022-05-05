@@ -11,6 +11,7 @@ import (
 
 	. "github.com/upsilonproject/upsilon-cli/internal/runtimeconfig"
 	"github.com/upsilonproject/upsilon-cli/internal/cmds"
+	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )
 
 var rootCmd = &cobra.Command{
@@ -26,13 +27,22 @@ func init() {
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
 	rootCmd.AddCommand(cmds.CmdMsgTail)
+	rootCmd.AddCommand(cmds.CmdGitPull)
 	rootCmd.AddCommand(cmds.CmdPing)
 
+	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)
+	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpInstall)
+	rootCmd.AddCommand(cmds.CmdAmqp)
+	rootCmd.AddCommand(cmds.CmdUpdateRequest)
+
 	rootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
+	rootCmd.PersistentFlags().StringP("logLevel", "l", "info", "log level")
 }
 
 func initFlagValues() {
 	RuntimeConfig.OutputFormat, _ = rootCmd.PersistentFlags().GetString("format")
+
+	RuntimeConfig.LogLevel, _ = rootCmd.PersistentFlags().GetString("logLevel")
 }
 
 func initConfig() {
@@ -51,10 +61,26 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
 
 	if err := viper.UnmarshalExact(&RuntimeConfig); err != nil {
 		log.Warnf("Unmarshal config err: %v", err)
 	}
+
+	onConfigChanged() 
+}
+
+func onConfigChanged() {
+	logLevel, _ := log.ParseLevel(RuntimeConfig.LogLevel)
+
+	if logLevel != log.GetLevel() {
+		log.Infof("Setting log level to: %v", logLevel)
+		log.SetLevel(logLevel)
+	}
+
+	amqp.AmqpHost = RuntimeConfig.AmqpHost
+	amqp.AmqpUser = RuntimeConfig.AmqpUser
+	amqp.AmqpPass = RuntimeConfig.AmqpPass
+	amqp.AmqpPort = RuntimeConfig.AmqpPort
 }
