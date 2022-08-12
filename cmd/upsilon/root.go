@@ -27,13 +27,20 @@ func init() {
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
 	rootCmd.AddCommand(cmds.CmdMsgTail)
-	rootCmd.AddCommand(cmds.CmdGitPull)
 	rootCmd.AddCommand(cmds.CmdPing)
 
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpInstall)
 	rootCmd.AddCommand(cmds.CmdAmqp)
-	rootCmd.AddCommand(cmds.CmdUpdateRequest)
+
+	rootCmd.AddCommand(cmds.CmdRequest)
+	cmds.CmdRequest.AddCommand(cmds.CmdRequestUpdate)
+	cmds.CmdRequest.AddCommand(cmds.CmdGitPull)
+	cmds.CmdRequest.AddCommand(cmds.CmdRequestExecution)
+
+	//rootCmd.AddCommand(cmds.CmdDrone)
+	//cmds.CmdDrone.AddCommand(cmds.CmdLatestVersion)
+
 
 	rootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
 	rootCmd.PersistentFlags().StringP("logLevel", "l", "info", "log level")

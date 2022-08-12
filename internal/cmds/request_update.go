@@ -6,16 +6,16 @@ import (
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )
 
-func runUpdateRequest(cmd *cobra.Command, args []string) {
+func runRequestUpdate(cmd *cobra.Command, args []string) {
 	req := pb.UpdateRequest{}
 
 	amqp.PublishPb(&req)
 }
 
-var CmdUpdateRequest = &cobra.Command{
-	Use:   "update-request",
+var CmdRequestUpdate = &cobra.Command{
+	Use:   "update",
 	Short: "Send update request",
-	Run: runUpdateRequest,
+	Run: runRequestUpdate,
 }
 
 

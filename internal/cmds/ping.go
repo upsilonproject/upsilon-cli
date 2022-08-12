@@ -11,7 +11,7 @@ import (
 func runPing(cmd *cobra.Command, args []string) {
 	req := pb.PingRequest{}
 
-	go amqp.Consume("PingResponse", func(d amqp.Delivery) {
+	waitForConsumer := amqp.Consume("PingResponse", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
 		res := pb.PingResponse{}
@@ -21,8 +21,7 @@ func runPing(cmd *cobra.Command, args []string) {
 		log.Infof("Ping reply: %+v", res.Hostname)
 	});
 
-	// The AMQP Server seems to need a moment to create the consumer.
-	time.Sleep(time.Second * 1)
+	waitForConsumer.Wait()
 
 	amqp.PublishPb(&req)
 
