@@ -28,6 +28,7 @@ func init() {
 	rootCmd.AddCommand(cmds.ConfigCmd)
 	rootCmd.AddCommand(cmds.CmdMsgTail)
 	rootCmd.AddCommand(cmds.CmdPing)
+	rootCmd.AddCommand(cmds.CmdServices)
 
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpInstall)

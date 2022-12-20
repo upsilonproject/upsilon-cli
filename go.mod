@@ -3,6 +3,7 @@ module github.com/upsilonproject/upsilon-cli
 go 1.16
 
 require (
+	github.com/buger/goterm v1.0.4 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.8.1

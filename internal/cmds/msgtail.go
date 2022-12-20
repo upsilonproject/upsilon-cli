@@ -10,7 +10,7 @@ import (
 )
 
 func msgTail(cmd *cobra.Command, args []string) {
-	amqp.Consume("*", func(d amqp.Delivery) {
+	_, handler := amqp.ConsumeForever("*", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
 		msgType := d.Message.Headers["Upsilon-Msg-Type"]
@@ -18,6 +18,8 @@ func msgTail(cmd *cobra.Command, args []string) {
 		log.Infof("Delivery %v %+v", msgType, string(d.Message.Body));
 		//len(d.Message.Body), string(d.Message.Body))
 	})
+
+	handler.Wait()
 }
 
 var CmdMsgTail = &cobra.Command{
