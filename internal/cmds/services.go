@@ -6,7 +6,6 @@ import (
 	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 	"github.com/upsilonproject/upsilon-cli/internal/output"
-	//log "github.com/sirupsen/logrus"
 )
 
 func runReport(cmd *cobra.Command, args []string) {
@@ -32,7 +31,7 @@ func runReport(cmd *cobra.Command, args []string) {
 }
 
 func rpt2tbl(res *pb.ReportResponse) *output.DataTable { 
-	var headers []string
+	var headers []interface{}
 
 	for _, col := range res.Columns {
 		headers = append(headers, col.Header)
@@ -44,7 +43,7 @@ func rpt2tbl(res *pb.ReportResponse) *output.DataTable {
 		cells := &output.TableRow{}
 
 		for _, hdr := range headers {
-			(*cells)[hdr] = row.Cells[hdr]
+			(*cells)[hdr.(string)] = row.Cells[hdr.(string)]
 		}
 
 		tbl.Append(cells)

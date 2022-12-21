@@ -47,7 +47,7 @@ func nodeList(cmd *cobra.Command, args []string) {
 }
 
 func getNodeTable() *output.DataTable {
-	return output.NewDataTable([]string {
+	return output.NewDataTable([]interface{} {
 		"identifier",
 		"type",
 		"version",
