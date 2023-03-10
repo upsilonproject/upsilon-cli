@@ -1,2 +1,2 @@
 default:
-	go build github.com/upsilonproject/upsilon-cli/cmd/upsilon/
+	go build -v github.com/upsilonproject/upsilon-cli/cmd/upsilon/

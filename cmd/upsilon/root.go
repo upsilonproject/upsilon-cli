@@ -19,22 +19,35 @@ var rootCmd = &cobra.Command{
 	Short: "The upsilon command.",
 }
 
+var listenCmd = &cobra.Command {
+	Use: "listen",
+	Short: "Listen to messages",
+}
+
+var cmdReport = &cobra.Command {
+	Use: "report",
+	Short: "Reports from the custodian.",
+	Aliases: []string{ "rpt" },
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.AddCommand(cmds.NodeCmd)
-	cmds.NodeCmd.AddCommand(cmds.NodeListCmd)
+	listenCmd.AddCommand(cmds.CmdListenNodeHeartbeats)
+	listenCmd.AddCommand(cmds.CmdMsgTail)
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
-	rootCmd.AddCommand(cmds.CmdMsgTail)
 	rootCmd.AddCommand(cmds.CmdPing)
-	rootCmd.AddCommand(cmds.CmdServices)
+	rootCmd.AddCommand(listenCmd)
 
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpInstall)
 	rootCmd.AddCommand(cmds.CmdAmqp)
 
+	cmdReport.AddCommand(cmds.CmdServicesReport)
+
 	rootCmd.AddCommand(cmds.CmdRequest)
+	cmds.CmdRequest.AddCommand(cmdReport)
 	cmds.CmdRequest.AddCommand(cmds.CmdRequestUpdate)
 	cmds.CmdRequest.AddCommand(cmds.CmdGitPull)
 	cmds.CmdRequest.AddCommand(cmds.CmdRequestExecution)

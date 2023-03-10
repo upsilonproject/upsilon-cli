@@ -13,7 +13,7 @@ func runReqExec(cmd *cobra.Command, args []string) {
 		CommandName: cmd.Flags().Lookup("command").Value.String(),
 	}
 
-	consumer, handler := amqp.ConsumeForever("ExecutionResult", func(d amqp.Delivery) {
+	consumer, handler := amqp.ConsumeSingle("ExecutionResult", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
 		execResult := pb.ExecutionResult{}
@@ -31,8 +31,10 @@ func runReqExec(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	CmdRequestExecution.Flags().StringP("hostname", "", "localhost", "Drone Hostname")
-	CmdRequestExecution.Flags().StringP("command", "", "command", "Command name")
+	CmdRequestExecution.Flags().StringP("hostname", "n", "", "Drone Hostname")
+	CmdRequestExecution.MarkFlagRequired("hostname")
+	CmdRequestExecution.Flags().StringP("command", "c", "", "Command name")
+	CmdRequestExecution.MarkFlagRequired("command")
 }
 
 

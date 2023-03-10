@@ -1,7 +1,6 @@
 package cmds
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
@@ -9,18 +8,31 @@ import (
 )
 
 func runReport(cmd *cobra.Command, args []string) {
-	req := pb.ReportRequest{}
+	includeGood, _ := cmd.PersistentFlags().GetBool("includeGood")
+
+	req := pb.ReportRequest{
+		IncludeGood: includeGood,
+	}
 
 	consumer, handler := amqp.ConsumeSingle("ReportResponse", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
-		res := &pb.ReportResponse{}
-		
-		amqp.Decode(d.Message.Body, res)
+		res := pb.ReportResponse{}
 
-		tbl := rpt2tbl(res)
+		amqp.Decode(d.Message.Body, &res)
 
-		fmt.Printf(output.Format(tbl))
+		tbl := reportToDataTable(&res)
+
+		output.Prepare(tbl)
+
+		if output.IsPrettyTable() {
+			output.PrettyTableRelativeTimestamps(5)
+			output.PrettyTableAddKarma(4)
+			output.PrettyTableSortBy("karma", "node", "service")
+			output.PrettyTableHeaders(getHeaders())
+		}
+
+		output.PrintPrepared()
 	});
 
 	consumer.Wait()
@@ -30,7 +42,7 @@ func runReport(cmd *cobra.Command, args []string) {
 	handler.Wait()
 }
 
-func rpt2tbl(res *pb.ReportResponse) *output.DataTable { 
+func reportToDataTable(res *pb.ReportResponse) *output.DataTable { 
 	var headers []interface{}
 
 	for _, col := range res.Columns {
@@ -52,18 +64,33 @@ func rpt2tbl(res *pb.ReportResponse) *output.DataTable {
 	return tbl
 }
 
+func getSortField() string {
+	sort, _ := CmdServicesReport.PersistentFlags().GetString("sortAsc")
+
+	if sort == "" {
+		sort, _ = CmdServicesReport.PersistentFlags().GetString("sortDec")
+	}
+
+	return sort
+}
+
+func getHeaders() []string {
+	headers, _ := CmdServicesReport.PersistentFlags().GetStringArray("headers")
+
+	return headers
+}
+
 func init() {
-	CmdServices.AddCommand(cmdServicesReport)
+	CmdServicesReport.PersistentFlags().StringP("sortAsc", "s", "", "Sort Ascending")
+	CmdServicesReport.PersistentFlags().StringP("sortDec", "S", "", "Sort Descending")
+	CmdServicesReport.PersistentFlags().StringArrayP("headers", "H", []string {}, "Headers")
+	CmdServicesReport.PersistentFlags().BoolP("includeGood", "g", false, "Include good services")
+	CmdServicesReport.Run = runReport
 }
 
-var cmdServicesReport = &cobra.Command{
-	Use: 	"report",
-	Short: "report",
-	Run: runReport,
-}
-
-var CmdServices = &cobra.Command{
+var CmdServicesReport = &cobra.Command{
 	Use:   "services",
+	Aliases: []string { "svc" },
 	Short: "Services Commands",
 }
 

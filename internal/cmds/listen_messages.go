@@ -23,7 +23,7 @@ func msgTail(cmd *cobra.Command, args []string) {
 }
 
 var CmdMsgTail = &cobra.Command{
-	Use:   "msgtail",
+	Use:   "messages",
 	Short: "Message Tail",
 	Run: msgTail,
 }

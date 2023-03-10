@@ -9,37 +9,45 @@ import (
 	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
 )
 
-func updateNodes(tbl *output.DataTable) {
-	//seenNodes := make(map[string]int, 0)
+type SeenNodes map[string]*pb.Heartbeat;
 
+func updateNodes(seenNodes *SeenNodes) {
 	_, handler := amqp.ConsumeForever("Heartbeat", func(d amqp.Delivery) {
 		d.Message.Ack(true)
 
-		hb := pb.Heartbeat{}
+		hb := &pb.Heartbeat{}
 
-		amqp.Decode(d.Message.Body, &hb)
+		amqp.Decode(d.Message.Body, hb)
 
-	//	if node, found := seenNodes[hb.Hostname]; !found {
-	//		seenNodes[hb.Hostname] = hb.Version
-	//	}
-
-		row := make(output.TableRow)
-		row["hostname"] = hb.Hostname
-		row["version"] = hb.Version
-		tbl.Append(&row)
+		if _, found := (*seenNodes)[hb.Hostname]; !found {
+			(*seenNodes)[hb.Hostname] = hb
+		} else {
+			(*seenNodes)[hb.Hostname].Version = hb.Version
+		}
 	});
 
 	handler.Wait()
 }
 
 func nodeList(cmd *cobra.Command, args []string) {
-	tbl := getNodeTable();
+	seenNodes := make(SeenNodes, 0)
 
-	go updateNodes(tbl)
+	go updateNodes(&seenNodes)
 
 	for {
 		term.Clear()
 		term.MoveCursor(1, 1)
+
+		tbl := getNodeTable();
+
+		for _, hb := range seenNodes {
+			row := make(output.TableRow)
+			row["identifier"] = hb.Hostname
+			row["type"] = hb.Type
+			row["version"] = hb.Version
+			tbl.Append(&row)
+		}
+
 		term.Println(output.Format(tbl))
 		term.Flush()
 		time.Sleep(time.Second)
@@ -54,12 +62,7 @@ func getNodeTable() *output.DataTable {
 	})
 }
 
-var NodeCmd = &cobra.Command{
-	Use:   "node",
-	Short: "Node details",
-}
-
-var NodeListCmd = &cobra.Command{
-	Use: "list",
+var CmdListenNodeHeartbeats = &cobra.Command{
+	Use: "heartbeats",
 	Run: nodeList,
 }

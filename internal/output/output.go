@@ -6,24 +6,46 @@ import (
 	text "github.com/jedib0t/go-pretty/text"
 	. "github.com/upsilonproject/upsilon-cli/internal/runtimeconfig"
 
+	"fmt"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 )
 
 type TableRow = map[string]string
+
 type DataTable struct {
 	Headers []interface{}
 	Rows map[int]*TableRow
 }
+
+var preparedTable table.Writer
+var headers = []string {}
+var columnConfigs = []table.ColumnConfig {}
 
 func (dt *DataTable) Append(row *TableRow) {
 	idx := len(dt.Rows)
 	dt.Rows[idx] = row
 }
 
+func Prepare(rows *DataTable) {
+	if IsPrettyTable() {
+		preparedTable = FormatOutputPrettyTable(rows)
+	}
+}
+
+func PrintPrepared() {
+	if IsPrettyTable() {
+		fmt.Printf(preparedTable.Render() + "\n")
+	}
+}
+
 func Format(rows *DataTable) string {
 	switch RuntimeConfig.OutputFormat {
 	case "table":
-		return formatOutputTable(rows)
+		tbl := FormatOutputPrettyTable(rows)
+
+		return tbl.Render() + "\n"
 	case "json":
 		return formatOutputJson(rows)
 	default:
@@ -33,28 +55,99 @@ func Format(rows *DataTable) string {
 
 }
 
+func IsPrettyTable() bool {
+	if RuntimeConfig.OutputFormat == "table" {
+		return true
+	} else {
+		return false
+	}
+}
+
 func formatOutputJson(rows *DataTable) string {
 	ret, _ := json.Marshal(rows)
 
 	return string(ret)
 }
 
-func formatOutputTable(dataTable *DataTable) string {
-	karmaTransformer := text.Transformer(func(val interface{}) string {
-		return text.FgRed.Sprint(val)
+func PrettyTableRelativeTimestamps(column int) {
+	timestampTransformer := text.Transformer(func(val interface{}) string {
+		cellTime, err := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s", val))
+
+		if err != nil {
+			log.Errorf("%v", err)
+			return "?"
+		}
+
+		diff := time.Now().Sub(cellTime)
+
+		if diff > (time.Hour * 24) {
+			return fmt.Sprintf("%v", val)
+		} else {
+			return diff.Truncate(time.Second).String()
+		}
 	})
+
+	columnConfigs = append(columnConfigs, table.ColumnConfig {
+		Number: column,
+		Transformer: timestampTransformer,
+	})
+}
+
+func PrettyTableAddKarma(column int) {
+	karmaTransformer := text.Transformer(func(val interface{}) string {
+		if val == "GOOD" {
+			return text.FgGreen.Sprint(val)
+		}
+
+		if val == "BAD" {
+			return text.FgRed.Sprint(val)
+		}
+
+		return fmt.Sprint(val)
+	})
+
+	columnConfigs = append(columnConfigs, table.ColumnConfig {
+		Number: column,
+		Transformer: karmaTransformer,
+	})
+}
+
+func PrettyTableSortBy(columns ...string) {
+	sortings := []table.SortBy{}
+
+	for _, column := range columns {
+		sortings = append(sortings, table.SortBy{Name: column, Mode: table.Asc})
+	}
+
+	preparedTable.SortBy(sortings)
+}
+
+func PrettyTableHeaders(newHeaders []string) {
+	headers = newHeaders
+
+	preparedTable.SetColumnConfigs(columnConfigs)
+}
+
+func FormatOutputPrettyTable(dataTable *DataTable) table.Writer {
+	if dataTable == nil {
+		log.Warnf("Cannot format a nil DataTable")
+		return nil
+	}
+
+	if len(dataTable.Headers) == 0 {
+		log.Warnf("%+v %v", dataTable, len(dataTable.Rows))
+		log.Warnf("Cannot format a DataTable that does not have any headers.")
+		return nil
+	}
 
 	tbl := table.NewWriter()
 	tbl.AppendHeader(dataTable.Headers)
 	tbl.SetStyle(table.StyleLight)
-//	tbl.Style().Color.Header = text.Colors{text.Bold}
-	tbl.SetColumnConfigs([]table.ColumnConfig {
-		{
-			ColorsHeader: text.Colors{text.Bold},
-			Transformer: karmaTransformer,
-		},
-	})
+	tbl.Style().Color.Header = text.Colors{text.Bold}
 	tbl.Style().Options.DrawBorder = false
+	tbl.SortBy([]table.SortBy{
+		{Name: dataTable.Headers[0].(string), Mode: table.Asc},
+	})
 
 	for i, _ := range dataTable.Rows {
 		row := dataTable.Rows[i] // because range is nondeterministic
@@ -67,8 +160,7 @@ func formatOutputTable(dataTable *DataTable) string {
 		tbl.AppendRow(cells)
 	}
 
-
-	return tbl.Render() + "\n"
+	return tbl
 }
 
 func NewDataTable(headers []interface{}) *DataTable {
