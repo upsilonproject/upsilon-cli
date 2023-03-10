@@ -20,7 +20,9 @@ func runReqExec(cmd *cobra.Command, args []string) {
 
 		amqp.Decode(d.Message.Body, &execResult)
 
-		log.Infof("%v", execResult)
+		log.Infof("Hostname: %v", execResult.Hostname)
+		log.Infof("Command: %v", execResult.Name)
+		log.Infof("Exit Code: %v", execResult.ExitCode)
 	})
 
 	consumer.Wait()
