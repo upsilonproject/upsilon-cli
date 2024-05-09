@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
+	log "github.com/sirupsen/logrus"
 )
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalf("Root command fatal error: %v", err);
 	}
 }
 

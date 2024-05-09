@@ -23,6 +23,7 @@ func updateNodes(seenNodes *SeenNodes) {
 			(*seenNodes)[hb.Hostname] = hb
 		} else {
 			(*seenNodes)[hb.Hostname].Version = hb.Version
+			(*seenNodes)[hb.Hostname].StatusLine = hb.StatusLine
 		}
 	});
 
@@ -45,6 +46,7 @@ func nodeList(cmd *cobra.Command, args []string) {
 			row["identifier"] = hb.Hostname
 			row["type"] = hb.Type
 			row["version"] = hb.Version
+			row["status"] = hb.StatusLine
 			tbl.Append(&row)
 		}
 
@@ -59,10 +61,12 @@ func getNodeTable() *output.DataTable {
 		"identifier",
 		"type",
 		"version",
+		"status",
 	})
 }
 
 var CmdListenNodeHeartbeats = &cobra.Command{
 	Use: "heartbeats",
+	Aliases: []string{ "hb" },
 	Run: nodeList,
 }
