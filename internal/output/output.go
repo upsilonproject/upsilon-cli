@@ -19,7 +19,9 @@ type DataTable struct {
 	Rows map[int]*TableRow
 }
 
+var emptyMessage string
 var preparedTable table.Writer
+var preparedRowCount int
 var headers = []string {}
 var columnConfigs = []table.ColumnConfig {}
 
@@ -28,16 +30,26 @@ func (dt *DataTable) Append(row *TableRow) {
 	dt.Rows[idx] = row
 }
 
-func Prepare(rows *DataTable) {
+func Prepare(rows *DataTable, msg string) {
+	emptyMessage = msg
+
 	if IsPrettyTable() {
+		preparedRowCount = len(rows.Rows)
 		preparedTable = FormatOutputPrettyTable(rows)
 	}
 }
 
 func PrintPrepared() {
 	if IsPrettyTable() {
-		fmt.Printf(preparedTable.Render() + "\n")
+		if preparedRowCount == 0 {
+			fmt.Println(emptyMessage)
+		} else {
+			fmt.Printf(preparedTable.Render() + "\n")
+		}
+		return
 	}
+
+	log.Fatalf("Prepared format is unknown.")
 }
 
 func Format(rows *DataTable) string {

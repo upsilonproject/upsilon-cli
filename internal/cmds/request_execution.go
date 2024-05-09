@@ -22,6 +22,8 @@ func runReqExec(cmd *cobra.Command, args []string) {
 
 		log.Infof("Hostname: %v", execResult.Hostname)
 		log.Infof("Command: %v", execResult.Name)
+		log.Infof("Stdout: %v", execResult.Stdout)
+		log.Infof("Stderr: %v", execResult.Stderr)
 		log.Infof("Exit Code: %v", execResult.ExitCode)
 	})
 

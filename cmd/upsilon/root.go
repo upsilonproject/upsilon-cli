@@ -21,6 +21,7 @@ var rootCmd = &cobra.Command{
 
 var listenCmd = &cobra.Command {
 	Use: "listen",
+	Aliases: []string{ "watch", "w" },
 	Short: "Listen to messages",
 }
 
@@ -38,6 +39,7 @@ func init() {
 
 	rootCmd.AddCommand(cmds.ConfigCmd)
 	rootCmd.AddCommand(cmds.CmdPing)
+	rootCmd.AddCommand(cmds.CmdStatus)
 	rootCmd.AddCommand(listenCmd)
 
 	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)

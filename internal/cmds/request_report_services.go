@@ -5,6 +5,7 @@ import (
 	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 	"github.com/upsilonproject/upsilon-cli/internal/output"
+	text "github.com/jedib0t/go-pretty/text"
 )
 
 func runReport(cmd *cobra.Command, args []string) {
@@ -23,7 +24,10 @@ func runReport(cmd *cobra.Command, args []string) {
 
 		tbl := reportToDataTable(&res)
 
-		output.Prepare(tbl)
+		output.Prepare(
+			tbl,
+			"All services are " + text.FgGreen.Sprintf("GOOD") + ".",
+		)
 
 		if output.IsPrettyTable() {
 			output.PrettyTableRelativeTimestamps(5)
