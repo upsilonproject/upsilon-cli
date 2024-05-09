@@ -6,7 +6,7 @@ import (
 
 var CmdRequest = &cobra.Command {
 	Use: "request",
-	Aliases: []string {"req"},
+	Aliases: []string {"req", "get"},
 	Short: "Send requests to the AMQP network",
 }
 
