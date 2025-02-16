@@ -2,7 +2,7 @@ package cmds
 
 import (
 	"github.com/spf13/cobra"
-	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
+	pb "github.com/upsilonproject/upsilon-gocommon/pkg/amqpproto"
 	log "github.com/sirupsen/logrus"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )

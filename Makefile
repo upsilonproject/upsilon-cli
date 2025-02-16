@@ -1,8 +1,5 @@
 default:
-	go build -v github.com/upsilonproject/upsilon-cli/cmd/upsilon/
-
-grpc:
-	buf generate
+	go build -v -o upsilon
 
 install:
 	cp upsilon /usr/local/sbin/upsilon

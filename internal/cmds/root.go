@@ -1,4 +1,4 @@
-package main
+package cmds
 
 import (
 	"fmt"
@@ -10,11 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	. "github.com/upsilonproject/upsilon-cli/internal/runtimeconfig"
-	"github.com/upsilonproject/upsilon-cli/internal/cmds"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:   "upsilon",
 	Short: "The upsilon command.",
 }
@@ -34,38 +33,38 @@ var cmdReport = &cobra.Command {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	listenCmd.AddCommand(cmds.CmdListenNodeHeartbeats)
-	listenCmd.AddCommand(cmds.CmdMsgTail)
+	listenCmd.AddCommand(CmdListenNodeHeartbeats)
+	listenCmd.AddCommand(CmdMsgTail)
 
-	rootCmd.AddCommand(cmds.ConfigCmd)
-	rootCmd.AddCommand(cmds.CmdPing)
-	rootCmd.AddCommand(cmds.CmdStatus)
-	rootCmd.AddCommand(listenCmd)
+	RootCmd.AddCommand(ConfigCmd)
+	RootCmd.AddCommand(CmdPing)
+	RootCmd.AddCommand(CmdStatus)
+	RootCmd.AddCommand(listenCmd)
 
-	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpConnections)
-	cmds.CmdAmqp.AddCommand(cmds.CmdAmqpInstall)
-	rootCmd.AddCommand(cmds.CmdAmqp)
+	CmdAmqp.AddCommand(CmdAmqpConnections)
+	CmdAmqp.AddCommand(CmdAmqpInstall)
+	RootCmd.AddCommand(CmdAmqp)
 
-	cmdReport.AddCommand(cmds.CmdServicesReport)
+	cmdReport.AddCommand(CmdServicesReport)
 
-	rootCmd.AddCommand(cmds.CmdRequest)
-	cmds.CmdRequest.AddCommand(cmdReport)
-	cmds.CmdRequest.AddCommand(cmds.CmdRequestUpdate)
-	cmds.CmdRequest.AddCommand(cmds.CmdGitPull)
-	cmds.CmdRequest.AddCommand(cmds.CmdRequestExecution)
+	RootCmd.AddCommand(CmdRequest)
+	CmdRequest.AddCommand(cmdReport)
+	CmdRequest.AddCommand(CmdRequestUpdate)
+	CmdRequest.AddCommand(CmdGitPull)
+	CmdRequest.AddCommand(CmdRequestExecution)
 
-	//rootCmd.AddCommand(cmds.CmdDrone)
+	//RootCmd.AddCommand(cmds.CmdDrone)
 	//cmds.CmdDrone.AddCommand(cmds.CmdLatestVersion)
 
 
-	rootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
-	rootCmd.PersistentFlags().StringP("logLevel", "l", "info", "log level")
+	RootCmd.PersistentFlags().StringP("format", "f", "table", "output format")
+	RootCmd.PersistentFlags().StringP("logLevel", "l", "info", "log level")
 }
 
 func initFlagValues() {
-	RuntimeConfig.OutputFormat, _ = rootCmd.PersistentFlags().GetString("format")
+	RuntimeConfig.OutputFormat, _ = RootCmd.PersistentFlags().GetString("format")
 
-	RuntimeConfig.LogLevel, _ = rootCmd.PersistentFlags().GetString("logLevel")
+	RuntimeConfig.LogLevel, _ = RootCmd.PersistentFlags().GetString("logLevel")
 }
 
 func initConfig() {

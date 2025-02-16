@@ -6,7 +6,7 @@ import (
 	"github.com/upsilonproject/upsilon-cli/internal/output"
 	term "github.com/buger/goterm"
 	"github.com/upsilonproject/upsilon-gocommon/pkg/amqp"
-	pb "github.com/upsilonproject/upsilon-cli/gen/amqpproto"
+	pb "github.com/upsilonproject/upsilon-gocommon/pkg/amqpproto"
 )
 
 type SeenNodes map[string]*pb.Heartbeat;
