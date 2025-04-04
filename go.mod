@@ -1,8 +1,7 @@
 module github.com/upsilonproject/upsilon-cli
 
 go 1.22.0
-
-toolchain go1.22.9
+toolchain go1.24.1
 
 require (
 	github.com/buger/goterm v1.0.4
